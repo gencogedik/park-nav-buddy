@@ -6,6 +6,7 @@ import { toast } from '../hooks/use-toast';
 
 const Index = () => {
   const [showCampaign, setShowCampaign] = useState(true);
+  const [isPanelClosed, setIsPanelClosed] = useState(false);
 
   const handleMenuClick = () => {
     toast({
@@ -25,6 +26,17 @@ const Index = () => {
     setShowCampaign(false);
   };
 
+  const handlePanelStateChange = (isOpen: boolean) => {
+    setIsPanelClosed(!isOpen);
+  };
+
+  const handleLocationSelect = () => {
+    toast({
+      title: "Konum Seçimi",
+      description: "Haritadan istediğiniz konumu seçebilirsiniz.",
+    });
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gray-100">
       {/* Map container */}
@@ -38,10 +50,12 @@ const Index = () => {
         onLocationClick={handleLocationClick}
         showCampaign={showCampaign}
         onCloseCampaign={handleCloseCampaign}
+        isPanelClosed={isPanelClosed}
+        onLocationSelect={handleLocationSelect}
       />
 
       {/* Bottom panel */}
-      <BottomPanel />
+      <BottomPanel onPanelStateChange={handlePanelStateChange} />
 
       {/* Mapbox token notice - remove this after adding your token */}
       <div className="absolute top-20 left-4 right-4 z-40">

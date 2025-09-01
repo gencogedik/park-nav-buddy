@@ -1,12 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Search, MapPin, Plus, Clock, CreditCard } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 
-const BottomPanel = () => {
+interface BottomPanelProps {
+  onPanelStateChange?: (isOpen: boolean) => void;
+}
+
+const BottomPanel: React.FC<BottomPanelProps> = ({ onPanelStateChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [panelHeight, setPanelHeight] = useState(200);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
+  const [startHeight, setStartHeight] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  
+  const minHeight = 80;
+  const maxHeight = window.innerHeight * 0.8;
+
+  // Handle drag events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartY(e.clientY);
+    setStartHeight(panelHeight);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setStartY(e.touches[0].clientY);
+    setStartHeight(panelHeight);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const deltaY = startY - e.clientY;
+      const newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
+      setPanelHeight(newHeight);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return;
+      
+      const deltaY = startY - e.touches[0].clientY;
+      const newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
+      setPanelHeight(newHeight);
+    };
+
+    const handleMouseUp = () => {
+      if (!isDragging) return;
+      setIsDragging(false);
+      
+      // Snap to positions
+      if (panelHeight < 120) {
+        setPanelHeight(minHeight);
+        setIsExpanded(false);
+        onPanelStateChange?.(false);
+      } else if (panelHeight > maxHeight * 0.4) {
+        setPanelHeight(maxHeight);
+        setIsExpanded(true);
+        onPanelStateChange?.(true);
+      } else {
+        setPanelHeight(200);
+        setIsExpanded(false);
+        onPanelStateChange?.(false);
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchend', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [isDragging, startY, startHeight, panelHeight, maxHeight, onPanelStateChange]);
 
   const actionCards = [
     {
@@ -40,19 +117,22 @@ const BottomPanel = () => {
   ];
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-30">
+    <div 
+      ref={panelRef}
+      className="absolute bottom-0 left-0 right-0 z-30"
+      style={{ height: `${panelHeight}px` }}
+    >
       {/* Handle bar */}
       <div 
-        className="flex justify-center py-2 cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex justify-center py-2 cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
       >
-        <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
+        <div className="w-12 h-1 bg-muted-foreground/50 rounded-full"></div>
       </div>
 
       {/* Panel content */}
-      <div className={`glass-morphism rounded-t-3xl px-6 pb-6 transition-all duration-300 ${
-        isExpanded ? 'min-h-[60vh]' : 'min-h-[200px]'
-      }`}>
+      <div className="glass-morphism rounded-t-3xl px-6 pb-6 h-full overflow-y-auto">
         
         {/* Search bar */}
         <div className="relative mb-6">
@@ -91,8 +171,8 @@ const BottomPanel = () => {
         </div>
 
         {/* Expanded content */}
-        {isExpanded && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
+        {panelHeight > 300 && (
+          <div className="mt-6 pt-6 border-t border-border">
             <div className="space-y-4">
               <Button 
                 className="w-full h-12 rounded-xl bg-parking-primary hover:bg-parking-primary/90 text-white font-medium"
@@ -103,13 +183,13 @@ const BottomPanel = () => {
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  className="h-10 rounded-lg border-gray-200 hover:bg-gray-50"
+                  className="h-10 rounded-lg"
                 >
                   Rezervasyonlarım
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-10 rounded-lg border-gray-200 hover:bg-gray-50"
+                  className="h-10 rounded-lg"
                 >
                   Favorilerim
                 </Button>
