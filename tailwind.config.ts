@@ -52,6 +52,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				parking: {
+					primary: 'hsl(var(--parking-primary))',
+					secondary: 'hsl(var(--parking-secondary))',
+					success: 'hsl(var(--parking-success))',
+					warning: 'hsl(var(--parking-warning))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
