@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      parking_spots: {
+        Row: {
+          address: string
+          available: boolean | null
+          coordinates: number[]
+          created_at: string | null
+          description: string
+          id: string
+          image_url: string | null
+          owner_id: string
+          price_per_hour: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          available?: boolean | null
+          coordinates: number[]
+          created_at?: string | null
+          description: string
+          id?: string
+          image_url?: string | null
+          owner_id: string
+          price_per_hour: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          available?: boolean | null
+          coordinates?: number[]
+          created_at?: string | null
+          description?: string
+          id?: string
+          image_url?: string | null
+          owner_id?: string
+          price_per_hour?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
