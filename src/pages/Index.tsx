@@ -56,23 +56,6 @@ const Index = () => {
 
       {/* Bottom panel */}
       <BottomPanel onPanelStateChange={handlePanelStateChange} />
-
-      {/* Mapbox token notice - remove this after adding your token */}
-      <div className="absolute top-20 left-4 right-4 z-40">
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg shadow-lg">
-          <p className="text-sm">
-            <strong>Geliştirici Notu:</strong> Mapbox API anahtarınızı ekleyin. 
-            <a 
-              href="https://mapbox.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="underline ml-1"
-            >
-              mapbox.com
-            </a> adresinden token alabilirsiniz.
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
