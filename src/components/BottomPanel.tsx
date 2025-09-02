@@ -6,9 +6,15 @@ import { Card, CardContent } from './ui/card';
 
 interface BottomPanelProps {
   onPanelStateChange?: (isOpen: boolean) => void;
+  onFindParkingClick: () => void;
+  onCreateParkingClick: () => void;
 }
 
-const BottomPanel: React.FC<BottomPanelProps> = ({ onPanelStateChange }) => {
+const BottomPanel: React.FC<BottomPanelProps> = ({ 
+  onPanelStateChange, 
+  onFindParkingClick, 
+  onCreateParkingClick 
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [panelHeight, setPanelHeight] = useState(200);
@@ -149,10 +155,20 @@ const BottomPanel: React.FC<BottomPanelProps> = ({ onPanelStateChange }) => {
         <div className="grid grid-cols-2 gap-4">
           {actionCards.map((card) => {
             const IconComponent = card.icon;
+            
+            const handleCardClick = () => {
+              if (card.id === 'find-parking') {
+                onFindParkingClick();
+              } else if (card.id === 'create-parking') {
+                onCreateParkingClick();
+              }
+            };
+            
             return (
               <Card 
                 key={card.id} 
                 className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] border-0 bg-white/90"
+                onClick={handleCardClick}
               >
                 <CardContent className="p-4 text-center">
                   <div className={`w-12 h-12 ${card.color} rounded-xl flex items-center justify-center mx-auto mb-3`}>
