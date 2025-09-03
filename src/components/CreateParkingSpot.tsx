@@ -27,6 +27,7 @@ const CreateParkingSpot: React.FC<CreateParkingSpotProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -106,6 +107,9 @@ const CreateParkingSpot: React.FC<CreateParkingSpotProps> = ({
                         setImagePreview(null);
                         if (fileInputRef.current) {
                           fileInputRef.current.value = '';
+                        }
+                        if (cameraInputRef.current) {
+                          cameraInputRef.current.value = '';
                         }
                       }}
                     >

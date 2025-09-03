@@ -26,29 +26,41 @@ const ParkingMap: React.FC<ParkingMapProps> = ({
         (position) => {
           setUserLocation([position.coords.latitude, position.coords.longitude]);
         },
-        (error) => console.log("Geolocation error:", error)
+        (error) => {
+          console.log("Geolocation error:", error);
+          // Kadıköy koordinatları olarak varsayılan konum ayarla
+          setUserLocation([40.9884, 29.0261]);
+        }
       );
     }
+  }, []);
 
-    // Mapbox haritasını başlat
+  useEffect(() => {
+    // Yandex haritasını başlat
     const initMap = async () => {
-      if (!mapRef.current || mapInstance.current) return;
+      if (!mapRef.current) return;
 
-      // Geçici olarak Mapbox token olmadan yandex haritasını kullan
       // @ts-ignore
       if (window.ymaps) {
         // @ts-ignore
         window.ymaps.ready(() => {
+          if (mapInstance.current) {
+            mapInstance.current.destroy();
+          }
+
           // @ts-ignore
           const map = new window.ymaps.Map(mapRef.current, {
-            center: [userLocation[0], userLocation[1]],
+            center: userLocation,
             zoom: 15,
+            controls: ['zoomControl', 'fullscreenControl']
           });
+
+          mapInstance.current = map;
 
           // Kullanıcı konumu işareti
           // @ts-ignore
           const userPlacemark = new window.ymaps.Placemark(
-            [userLocation[0], userLocation[1]],
+            userLocation,
             { balloonContent: "Benim Konumum" },
             { preset: "islands#blueCircleIcon" }
           );
@@ -58,17 +70,17 @@ const ParkingMap: React.FC<ParkingMapProps> = ({
           parkingSpots.forEach((spot) => {
             // @ts-ignore
             const placemark = new window.ymaps.Placemark(
-              [spot.coordinates[0], spot.coordinates[1]],
+              spot.coordinates,
               {
                 balloonContent: `
-                  <div>
+                  <div style="padding: 8px; max-width: 200px;">
                     <b>${spot.title}</b><br/>
-                    ${spot.description}<br/>
-                    Fiyat: ${spot.price_per_hour}₺/saat<br/>
-                    ${spot.available ? 'Müsait' : 'Dolu'}<br/>
+                    <p style="margin: 5px 0; font-size: 12px;">${spot.description}</p>
+                    <p style="margin: 5px 0;"><strong>Fiyat:</strong> ${spot.price_per_hour}₺/saat</p>
+                    <p style="margin: 5px 0;"><strong>Durum:</strong> ${spot.available ? '<span style="color: green;">Müsait</span>' : '<span style="color: red;">Dolu</span>'}</p>
                     ${
                       spot.available
-                        ? "<button style='padding:4px 8px;margin-top:4px;background:#22C55E;color:#fff;border:none;border-radius:4px;'>Rezerve Et</button>"
+                        ? '<button style="padding:6px 12px;margin-top:8px;background:#22C55E;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Rezerve Et</button>'
                         : ""
                     }
                   </div>
@@ -84,22 +96,31 @@ const ParkingMap: React.FC<ParkingMapProps> = ({
           });
 
           // Harita tıklama olayı
-          if (onMapClick) {
+          if (onMapClick && isMapClickEnabled) {
             map.events.add('click', async (e: any) => {
-              if (isMapClickEnabled) {
-                const coords = e.get('coords');
-                // Reverse geocoding için basit bir adres oluştur
-                const address = `Seçilen Konum (${coords[0].toFixed(6)}, ${coords[1].toFixed(6)})`;
-                onMapClick([coords[0], coords[1]], address);
-              }
+              const coords = e.get('coords');
+              // Daha gerçekçi bir adres oluştur
+              const address = `Seçilen Konum - ${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`;
+              onMapClick([coords[0], coords[1]], address);
             });
           }
         });
+      } else {
+        // Yandex Maps henüz yüklenmediyse, biraz bekle ve tekrar dene
+        setTimeout(() => initMap(), 500);
       }
     };
 
     initMap();
-  }, [userLocation]);
+
+    // Cleanup function
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.destroy();
+        mapInstance.current = null;
+      }
+    };
+  }, [userLocation, parkingSpots, onMapClick, isMapClickEnabled]);
 
   return <div ref={mapRef} className="w-full h-full absolute inset-0" />;
 };

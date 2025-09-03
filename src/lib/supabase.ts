@@ -31,12 +31,16 @@ export const parkingApi = {
     image_url?: string;
   }) {
     try {
+      // Get current user or use a fallback ID
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id || `anonymous_${Date.now()}`;
+
       const { data, error } = await supabase
         .from('parking_spots')
         .insert([{
           ...spotData,
           available: true,
-          owner_id: (await supabase.auth.getUser()).data.user?.id || 'anonymous'
+          owner_id: userId
         }])
         .select()
         .single();

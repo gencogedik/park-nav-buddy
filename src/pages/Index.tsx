@@ -18,6 +18,19 @@ const Index = () => {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [isMapClickEnabled, setIsMapClickEnabled] = useState(false);
 
+  // Sayfa yüklendiğinde park yerlerini getir
+  React.useEffect(() => {
+    const loadParkingSpots = async () => {
+      try {
+        const spots = await parkingApi.getAllParkingSpots();
+        setParkingSpots(spots || []);
+      } catch (error) {
+        console.error('Park yerleri yüklenemedi:', error);
+      }
+    };
+    loadParkingSpots();
+  }, []);
+
   const handleMenuClick = () => {
     toast({
       title: "Menü",
