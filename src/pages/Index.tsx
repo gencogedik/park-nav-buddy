@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ParkingMap from '../components/ParkingMap';
 import MapOverlay from '../components/MapOverlay';
 import BottomPanel from '../components/BottomPanel';
@@ -18,8 +18,7 @@ const Index = () => {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [isMapClickEnabled, setIsMapClickEnabled] = useState(false);
 
-  // Sayfa yüklendiğinde park yerlerini getir
-  React.useEffect(() => {
+  useEffect(() => {
     const loadParkingSpots = async () => {
       try {
         const spots = await parkingApi.getAllParkingSpots();
