@@ -33,26 +33,38 @@ export const parkingApi = {
     try {
       // Get current user or use a fallback ID
       const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id || `anonymous_${Date.now()}`;
+      const userId = user?.id || '00000000-0000-0000-0000-000000000000';
 
       const { data, error } = await supabase
         .from('parking_spots')
         .insert([{
-          ...spotData,
+          coordinates: spotData.coordinates,
+          title: spotData.title,
+          description: spotData.description,
+          price_per_hour: spotData.price_per_hour,
+          address: spotData.address,
+          image_url: spotData.image_url,
           available: true,
           owner_id: userId
         }])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Database error details:', error);
+        throw new Error('Park alanı kaydedilemedi. Lütfen tekrar deneyin.');
+      }
+      
       return {
         ...data,
         coordinates: data.coordinates as [number, number]
       };
-    } catch (error) {
-      console.error('Supabase insert error:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Create parking spot error:', error);
+      if (error.message && error.message.includes('Park alanı kaydedilemedi')) {
+        throw error;
+      }
+      throw new Error('Veritabanı bağlantı hatası. İnternet bağlantınızı kontrol edin.');
     }
   },
 

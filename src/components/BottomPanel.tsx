@@ -17,79 +17,11 @@ const BottomPanel: React.FC<BottomPanelProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [panelHeight, setPanelHeight] = useState(200);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [startHeight, setStartHeight] = useState(0);
-  const panelRef = useRef<HTMLDivElement>(null);
-  
-  const minHeight = 80;
-  const maxHeight = window.innerHeight * 0.8;
 
-  // Handle drag events
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartY(e.clientY);
-    setStartHeight(panelHeight);
+  const togglePanel = () => {
+    setIsExpanded(!isExpanded);
+    onPanelStateChange?.(!isExpanded);
   };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    setStartY(e.touches[0].clientY);
-    setStartHeight(panelHeight);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      
-      const deltaY = startY - e.clientY;
-      const newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
-      setPanelHeight(newHeight);
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging) return;
-      
-      const deltaY = startY - e.touches[0].clientY;
-      const newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
-      setPanelHeight(newHeight);
-    };
-
-    const handleMouseUp = () => {
-      if (!isDragging) return;
-      setIsDragging(false);
-      
-      // Snap to positions
-      if (panelHeight < 120) {
-        setPanelHeight(minHeight);
-        setIsExpanded(false);
-        onPanelStateChange?.(false);
-      } else if (panelHeight > maxHeight * 0.4) {
-        setPanelHeight(maxHeight);
-        setIsExpanded(true);
-        onPanelStateChange?.(true);
-      } else {
-        setPanelHeight(200);
-        setIsExpanded(false);
-        onPanelStateChange?.(false);
-      }
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('touchmove', handleTouchMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchend', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('touchend', handleMouseUp);
-    };
-  }, [isDragging, startY, startHeight, panelHeight, maxHeight, onPanelStateChange]);
 
   const actionCards = [
     {
@@ -123,16 +55,13 @@ const BottomPanel: React.FC<BottomPanelProps> = ({
   ];
 
   return (
-    <div 
-      ref={panelRef}
-      className="absolute bottom-0 left-0 right-0 z-30"
-      style={{ height: `${panelHeight}px` }}
-    >
+    <div className={`absolute bottom-0 left-0 right-0 z-30 transition-all duration-300 ease-out ${
+      isExpanded ? 'h-[80vh]' : 'h-[240px]'
+    }`}>
       {/* Handle bar */}
       <div 
-        className="flex justify-center py-2 cursor-grab active:cursor-grabbing"
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
+        className="flex justify-center py-2 cursor-pointer active:scale-95 transition-transform"
+        onClick={togglePanel}
       >
         <div className="w-12 h-1 bg-muted-foreground/50 rounded-full"></div>
       </div>
@@ -187,7 +116,7 @@ const BottomPanel: React.FC<BottomPanelProps> = ({
         </div>
 
         {/* Expanded content */}
-        {panelHeight > 300 && (
+        {isExpanded && (
           <div className="mt-6 pt-6 border-t border-border">
             <div className="space-y-4">
               <Button 

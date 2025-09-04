@@ -20,18 +20,30 @@ const ParkingMap: React.FC<ParkingMapProps> = ({
   const mapInstance = useRef<any | null>(null);
 
   useEffect(() => {
-    // Kullanıcı konumunu al
-    if (navigator.geolocation) {
+    // Kullanıcı konumunu al - session storage'dan önce kontrol et
+    const savedLocation = sessionStorage.getItem('userLocation');
+    if (savedLocation) {
+      const [lat, lng] = JSON.parse(savedLocation);
+      setUserLocation([lat, lng]);
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation([position.coords.latitude, position.coords.longitude]);
+          const location: [number, number] = [position.coords.latitude, position.coords.longitude];
+          setUserLocation(location);
+          sessionStorage.setItem('userLocation', JSON.stringify(location));
         },
         (error) => {
-          console.log("Geolocation error:", error);
-          // Kadıköy koordinatlarını varsayılan olarak kullan
-          setUserLocation([40.9884, 29.0261]);
-        }
+          // Kadıköy koordinatlarını varsayılan olarak kullan - sessiz hata
+          const defaultLocation: [number, number] = [40.9884, 29.0261];
+          setUserLocation(defaultLocation);
+          sessionStorage.setItem('userLocation', JSON.stringify(defaultLocation));
+        },
+        { timeout: 5000, enableHighAccuracy: false }
       );
+    } else {
+      const defaultLocation: [number, number] = [40.9884, 29.0261];
+      setUserLocation(defaultLocation);
+      sessionStorage.setItem('userLocation', JSON.stringify(defaultLocation));
     }
 
     // Yandex haritasını başlat

@@ -86,17 +86,6 @@ const MapOverlay: React.FC<MapOverlayProps> = ({
         </div>
       )}
 
-      {/* Location button - Bottom right */}
-      <div className="absolute bottom-32 right-4 z-20">
-        <Button
-          variant="secondary"
-          size="icon"
-          className="glass-morphism rounded-full w-12 h-12 shadow-lg hover:scale-105 transition-transform"
-          onClick={onLocationClick}
-        >
-          <Navigation className="h-5 w-5" />
-        </Button>
-      </div>
 
       {/* Location selection mode overlay */}
       {isLocationSelectMode && (
